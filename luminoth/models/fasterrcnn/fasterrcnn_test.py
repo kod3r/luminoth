@@ -47,10 +47,11 @@ class FasterRCNNNetworkTest(tf.test.TestCase):
                     'dropout_keep_prop': 1.0,
                     'activation_function': 'relu6',
                     'l2_regularization_scale': 0.0005,
+                    'use_mean': False,
                     'initializer': {
                         'type': 'variance_scaling_initializer',
                         'factor': 1.0,
-                        'uniform': 'True',
+                        'uniform': True,
                         'mode': 'FAN_AVG'
                     },
                     'roi': {
@@ -63,6 +64,7 @@ class FasterRCNNNetworkTest(tf.test.TestCase):
                       'class_max_detections': 100,
                       'class_nms_threshold': 0.6,
                       'total_max_detections': 300,
+                      'min_prob_threshold': 0.5
                     },
                     'target': {
                       'foreground_fraction': 0.25,
@@ -75,10 +77,21 @@ class FasterRCNNNetworkTest(tf.test.TestCase):
                 'rpn': {
                    'num_channels': 512,
                    'kernel_shape': [3, 3],
-                   'initializer': {
-                     'type': 'truncated_normal_initializer',
-                     'mean': 0.0,
-                     'stddev': 0.01
+                   'rpn_initializer': {
+                       'type': 'variance_scaling_initializer',
+                       'factor': 1.0,
+                       'uniform': 'True',
+                       'mode': 'FAN_AVG'
+                   },
+                   'cls_initializer': {
+                       'type': 'truncated_normal_initializer',
+                       'mean': 0.0,
+                       'stddev': 0.01,
+                   },
+                   'bbox_initializer': {
+                       'type': 'truncated_normal_initializer',
+                       'mean': 0.0,
+                       'stddev': 0.01,
                    },
                    'activation_function': 'relu6',
                    'l2_regularization_scale': 0.0005,
@@ -86,7 +99,9 @@ class FasterRCNNNetworkTest(tf.test.TestCase):
                      'pre_nms_top_n': 12000,
                      'post_nms_top_n': 2000,
                      'nms_threshold': 0.6,
-                     'min_size': 0
+                     'min_size': 0,
+                     'clip_after_nms': False,
+                     'filter_outside_anchors': False
                    },
                    'target': {
                      'allowed_border': 0,

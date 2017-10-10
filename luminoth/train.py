@@ -58,7 +58,7 @@ def run(config_files, override_params, target='', cluster_spec=None,
     # https://www.tensorflow.org/api_docs/python/tf/train/replica_device_setter
     with tf.device(tf.train.replica_device_setter(cluster=cluster_spec)):
 
-        dataset_class = get_dataset_fn(dataset_type)
+        dataset_class = get_dataset_fn(config.dataset.type)
         dataset = dataset_class(config)
         train_dataset = dataset()
 

@@ -1,4 +1,3 @@
-import easydict
 import os.path
 import tensorflow as tf
 import yaml
@@ -11,7 +10,7 @@ def load_config(filenames, overwrite=False, warn_overwrite=False):
         tf.logging.error("Tried to load 0 config files.")
     config = EasyDict({})
     for filename in filenames:
-        new_config = easydict.EasyDict(yaml.load(tf.gfile.GFile(filename)))
+        new_config = EasyDict(yaml.load(tf.gfile.GFile(filename)))
         config = merge_into(
             new_config,
             config, overwrite=overwrite, warn_overwrite=warn_overwrite
@@ -52,7 +51,7 @@ def types_compatible(new_config_value, base_config_value):
 
 
 def merge_into(new_config, base_config, overwrite=False, warn_overwrite=False):
-    if type(new_config) is not easydict.EasyDict:
+    if type(new_config) is not EasyDict:
         return
 
     for key, value in new_config.items():
@@ -72,7 +71,9 @@ def merge_into(new_config, base_config, overwrite=False, warn_overwrite=False):
                 overwrite=overwrite, warn_overwrite=warn_overwrite
             )
         else:
-            if base_config.get(key) is None or overwrite:
+            if base_config.get(key) is None:
+                base_config[key] = value
+            elif overwrite:
                 base_config[key] = value
                 if warn_overwrite:
                     tf.logging.warn('Overwrote key "{}"'.format(key))
@@ -100,7 +101,7 @@ def parse_override(override_options):
 
         local_override_dict[nested_keys[-1]] = parse_config_value(value)
 
-    return easydict.EasyDict(override_dict)
+    return EasyDict(override_dict)
 
 
 def parse_config_value(value):
@@ -129,7 +130,7 @@ def parse_config_value(value):
 
 
 def get_model_config(base_config, custom_config, override_params):
-    config = easydict.EasyDict(base_config.copy())
+    config = EasyDict(base_config.copy())
 
     if custom_config:
         # If we have a custom config file overwriting default settings

@@ -59,13 +59,17 @@ class RPNProposal(snt.AbstractModule):
                 nms_proposals_scores: A Tensor with the probability of being an
                     object for that proposal. Its shape should be
                     (total_nms_proposals, 1)
-                proposals: A Tensor with all the valid RPN proposals.
-                scores: A Tensor with a score for each of the valid RPN
-                    proposals.
-                proposals_raw: A Tensor with all the RPN proposals without any
-                    filtering.
-                scores_raw: A Tensor with a score for each of the unfiltered
-                    RPN proposals.
+                scores:  A Tensor with the scores of the proposals contained
+                    in the tensors proposals and proposals_unclipped.
+                proposals: A Tensor with all the valid area RPN proposals, this
+                    tensor is return in debug mode only and is used for
+                    testing, this proposals are clipped if _clip_after_nms is
+                    set to False.
+                proposals_unclipped: Same as proposals but the proposals in
+                    this tensor are never clipped independently of
+                    _clip_after_nms.
+                all_proposals: A Tensor with all the proposals, including the
+                    ones with zero or negative area.
         """
         # Scores are extracted from the second scalar of the cls probability.
         # cls_probability is a softmax of (background, foreground).
@@ -118,8 +122,7 @@ class RPNProposal(snt.AbstractModule):
             name='filter_invalid_proposals'
         )
         if self._debug:
-            proposals_raw = tf.identity(proposals)
-            scores_raw = tf.identity(scores)
+            proposals_unclipped = tf.identity(proposals)
 
         if not self._clip_after_nms:
             # Clip proposals to the image.
@@ -185,11 +188,10 @@ class RPNProposal(snt.AbstractModule):
             pred.update({
                 'proposals': proposals,
                 'scores': scores,
-                'proposals_raw': proposals_raw,
-                'scores_raw': scores_raw,
+                'proposals_unclipped': proposals_unclipped,
                 'top_k_proposals': top_k_proposals,
                 'top_k_scores': top_k_scores,
-                'all_proposals': all_proposals
+                'all_proposals': all_proposals,
             })
 
         return pred
